@@ -117,10 +117,7 @@ async def generate_prd(message: str) -> str:
         
         # 存储位置
         storage = result['prd']['storage']
-        if storage.get('type') == 'feishu_doc':
-            output.append(f"🔗 **飞书文档**: {storage.get('url', 'N/A')}")
-        else:
-            output.append(f"📁 **本地路径**: {storage.get('path', 'N/A')}")
+        output.append(f"📁 **本地路径**: {storage.get('path', 'N/A')}")
         
         # 改进建议
         if result['quality_report']['suggestions']:

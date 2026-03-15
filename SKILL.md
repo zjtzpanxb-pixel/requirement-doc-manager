@@ -1,7 +1,6 @@
 # Requirement Doc Manager Skill
 
 ## 触发条件
-- 飞书消息："整理需求文档" / "生成 PRD" / "需求文档" / "写 PRD"
 - 命令行：`openclaw req-doc --input <file> [--template standard|lite]`
 - 直接调用：提供需求描述文字即可触发
 
@@ -17,7 +16,7 @@
 ## 输入
 ```json
 {
-  "source": "feishu_message|file|meeting_transcript|voice",
+  "source": "file|meeting_transcript|voice|text",
   "content": "string (需求描述，50-10000 字)",
   "context": {
     "project_name": "string (可选，项目名称)",
@@ -39,7 +38,7 @@
     "business_rules": ["string"],
     "acceptance_criteria": ["string"],
     "risks": [{"description": "string", "level": "high|medium|low"}],
-    "storage": {"type": "feishu_doc|markdown", "url": "string"}
+    "storage": {"type": "markdown", "path": "string"}
   },
   "quality_report": {
     "completeness_score": 0-100,
@@ -60,12 +59,6 @@
 
 ## 配置
 ```yaml
-# 飞书配置
-feishu:
-  app_id: ${FEISHU_APP_ID}
-  app_secret: ${FEISHU_APP_SECRET}
-  storage_folder: /需求文档库
-
 # LLM 配置
 llm:
   primary: qwen3.5-plus
@@ -94,7 +87,7 @@ template:
 3. 完整性校验 → 检查必填项 + 格式规范
 4. 质量评分 → 完整率/清晰度/一致性
 5. 文档生成 → 填充模板（标准版/精简版）
-6. 推送归档 → 飞书文档创建 + 日志记录
+6. 推送归档 → 本地 Markdown 存储 + 日志记录
 ```
 
 ## 降级策略
@@ -102,7 +95,6 @@ template:
 |------|------|
 | LLM 超时 | 重试 3 次（指数退避）→ 降级 qwen2 |
 | 抽取为空 | 追问用户补充 → 标记"待确认" |
-| 飞书失败 | 重试 → 本地 Markdown 存储 |
 | 成本超支 | 建议精简版 → 用户拒绝则中止 |
 | 连续失败 | >3 次触发告警 → 建议人工处理 |
 
@@ -115,7 +107,6 @@ template:
 | REQ-DOC-202 | 抽取结果为空 |
 | REQ-DOC-301 | 完整性校验失败 |
 | REQ-DOC-401 | 模板渲染失败 |
-| REQ-DOC-402 | 飞书 API 失败 |
 | REQ-DOC-501 | 存储失败 |
 | REQ-DOC-502 | 成本超支 |
 
@@ -133,25 +124,15 @@ template:
 
 ## 示例
 
-### 示例 1：飞书消息触发
-```
-用户：整理需求文档
-用户：需要一个用户登录功能，支持手机号和邮箱注册，登录后可以查看个人信息和修改密码
-
-输出：
-- PRD 文档（飞书链接）
-- 质量报告：完整率 85/100，建议补充业务规则
-```
-
-### 示例 2：命令行触发
+### 示例 1：命令行触发
 ```bash
 openclaw req-doc --input requirement.txt --template standard
 ```
 
-### 示例 3：会议记录触发
+### 示例 2：会议记录触发
 ```
 用户：整理这个会议的需求
-用户：[粘贴飞书妙计转写内容]
+用户：[粘贴会议转写内容]
 
 输出：
 - 从会议记录提取需求

@@ -219,7 +219,7 @@ class ReqDocOrchestrator:
     async def _archive(self, prd: Dict[str, Any], context: ExecutionContext) -> None:
         """State 5: 归档存储"""
         try:
-            # 创建飞书文档或本地存储
+            # 本地存储
             storage_info = await self.pusher.push(prd, context.input_data)
             prd["storage"] = storage_info
             

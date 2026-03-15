@@ -49,14 +49,6 @@
     "DASHSCOPE_API_KEY": {
       "required": true,
       "description": "阿里云百炼 API Key"
-    },
-    "FEISHU_APP_ID": {
-      "required": false,
-      "description": "飞书应用 ID"
-    },
-    "FEISHU_APP_SECRET": {
-      "required": false,
-      "description": "飞书应用密钥"
     }
   }
 }

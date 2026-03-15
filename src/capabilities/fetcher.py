@@ -40,7 +40,7 @@ class ContentFetcher:
         logger.info(f"获取内容，源：{source}, 长度：{len(content)}")
         
         # 根据源类型处理
-        if source in ["feishu_message", "cli", "text"]:
+        if source in ["cli", "text"]:
             return content
         elif source == "file":
             return await self._fetch_file(content)

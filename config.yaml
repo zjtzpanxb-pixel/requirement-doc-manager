@@ -3,14 +3,6 @@
 # 环境配置
 environment: dev  # dev | prod
 
-# 飞书配置
-feishu:
-  app_id: ${FEISHU_APP_ID}
-  app_secret: ${FEISHU_APP_SECRET}
-  storage_folder: /需求文档库
-  bot_name: 需求助手
-  notification_group: 产品需求讨论群
-
 # LLM 配置
 llm:
   primary: qwen3.5-plus
