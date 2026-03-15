@@ -1,0 +1,62 @@
+{
+  "name": "requirement-doc-manager",
+  "version": "1.0.0",
+  "description": "从需求描述自动生成结构化 PRD 文档",
+  "author": "Skill Creator Pro Framework",
+  "entry": "main.py",
+  "function": "run",
+  "triggers": [
+    "整理需求文档",
+    "生成 PRD",
+    "写需求文档",
+    "写 prd",
+    "需求文档",
+    "生成需求",
+    "prD 文档"
+  ],
+  "parameters": {
+    "content": {
+      "type": "string",
+      "required": true,
+      "description": "需求描述"
+    },
+    "project": {
+      "type": "string",
+      "required": false,
+      "description": "项目名称"
+    },
+    "priority": {
+      "type": "string",
+      "required": false,
+      "enum": ["P0", "P1", "P2"],
+      "default": "P1",
+      "description": "优先级"
+    },
+    "template": {
+      "type": "string",
+      "required": false,
+      "enum": ["standard", "lite"],
+      "default": "standard",
+      "description": "模板类型"
+    }
+  },
+  "examples": [
+    "整理需求文档：需要一个用户登录功能",
+    "生成 PRD --project 用户管理系统",
+    "写一个需求文档，优先级 P0"
+  ],
+  "env": {
+    "DASHSCOPE_API_KEY": {
+      "required": true,
+      "description": "阿里云百炼 API Key"
+    },
+    "FEISHU_APP_ID": {
+      "required": false,
+      "description": "飞书应用 ID"
+    },
+    "FEISHU_APP_SECRET": {
+      "required": false,
+      "description": "飞书应用密钥"
+    }
+  }
+}

@@ -1,0 +1,142 @@
+# Requirement Doc Manager - 配置文件
+
+# 环境配置
+environment: dev  # dev | prod
+
+# 飞书配置
+feishu:
+  app_id: ${FEISHU_APP_ID}
+  app_secret: ${FEISHU_APP_SECRET}
+  storage_folder: /需求文档库
+  bot_name: 需求助手
+  notification_group: 产品需求讨论群
+
+# LLM 配置
+llm:
+  primary: qwen3.5-plus
+  fallback: qwen2
+  timeout: 60
+  max_retries: 3
+  base_delay: 1.0  # 指数退避基数（秒）
+  
+  # Token 限制
+  max_input_tokens: 10000
+  max_output_tokens: 4000
+  
+  # 成本估算（每 1000 tokens）
+  cost_per_1k_tokens:
+    qwen3.5-plus: 0.002
+    qwen2: 0.0005
+
+# 成本配置
+cost:
+  daily_limit: 30
+  monthly_limit: 100
+  alert_threshold: 0.8  # 80% 预警
+  estimate_per_request:
+    standard: 2.0
+    lite: 1.0
+
+# 模板配置
+template:
+  default: standard
+  versions:
+    - standard
+    - lite
+  
+  # 模板选择规则
+  selection_rules:
+    - condition: "content_length < 500"
+      recommend: lite
+    - condition: "content_length >= 500"
+      recommend: standard
+
+# 质量配置
+quality:
+  # 评分权重
+  weights:
+    completeness: 0.4
+    clarity: 0.3
+    consistency: 0.3
+  
+  # 通过阈值
+  thresholds:
+    min_completeness: 70
+    min_clarity: 60
+    min_consistency: 70
+  
+  # 必填字段
+  required_fields:
+    - user_stories
+    - functional_requirements
+    - acceptance_criteria
+
+# 重试配置
+retry:
+  max_attempts: 3
+  base_delay: 1.0
+  max_delay: 30.0
+  exponential_base: 2
+
+# 熔断器配置
+circuit_breaker:
+  enabled: true
+  failure_threshold: 5
+  reset_timeout: 60  # 秒
+
+# 日志配置
+logging:
+  level: INFO
+  format: json
+  path: /var/log/openclaw/req-doc.log
+  max_size: 100MB
+  backup_count: 5
+
+# 监控配置
+monitoring:
+  enabled: true
+  metrics:
+    - success_rate
+    - p95_latency
+    - cost_per_request
+    - completeness_score
+    - user_satisfaction
+  
+  alerts:
+    - name: 连续失败
+      condition: "consecutive_failures > 3"
+      action: notify
+    - name: 成本超支
+      condition: "daily_cost > daily_limit * 0.8"
+      action: warn
+    - name: 延迟过高
+      condition: "p95_latency > 300"
+      action: warn
+
+# 安全配置
+security:
+  # 输入过滤
+  input_validation:
+    max_length: 10000
+    allowed_file_types:
+      - .txt
+      - .md
+      - .docx
+    max_file_size: 10MB
+  
+  # Prompt Injection 防护
+  prompt_injection_protection:
+    enabled: true
+    dangerous_patterns:
+      - "忽略上述指令"
+      - "系统提示"
+      - "<script>"
+      - "```"
+  
+  # 敏感信息过滤
+  sensitive_data_filter:
+    enabled: true
+    patterns:
+      - "password"
+      - "secret"
+      - "token"

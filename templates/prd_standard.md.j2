@@ -1,0 +1,90 @@
+# {{ prd.title }}
+
+**版本**: {{ prd.version }}  
+**创建时间**: {{ prd.created_at }}  
+**优先级**: {{ context.priority | default('P1') }}
+
+---
+
+## 1. 背景
+
+{{ prd.background }}
+
+---
+
+## 2. 用户角色
+
+{% for story in prd.user_stories %}
+- **{{ story.role }}**: {{ story.need }}
+{% endfor %}
+
+---
+
+## 3. 用户故事
+
+{% for story in prd.user_stories %}
+### {{ loop.index }}. {{ story.role }}
+- **作为** {{ story.role }}
+- **我想要** {{ story.need }}
+- **以便** {{ story.benefit }}
+
+{% endfor %}
+
+---
+
+## 4. 功能需求
+
+{% for req in prd.functional_requirements %}
+### {{ req.id }}. {{ req.title }}
+{{ req.description }}
+
+{% endfor %}
+
+---
+
+## 5. 业务规则
+
+{% for rule in prd.business_rules %}
+- {{ rule }}
+{% endfor %}
+
+---
+
+## 6. 验收标准
+
+{% for criteria in prd.acceptance_criteria %}
+- [ ] {{ criteria }}
+{% endfor %}
+
+---
+
+## 7. 非功能需求
+
+- **性能**: 响应时间 < 2 秒
+- **安全**: 密码加密存储
+- **兼容性**: 支持主流浏览器
+
+---
+
+## 8. 风险与约束
+
+{% for risk in prd.risks %}
+- **{{ risk.level | upper }}**: {{ risk.description }}
+  {% if risk.mitigation %}
+  - 缓解措施：{{ risk.mitigation }}
+  {% endif %}
+{% endfor %}
+
+---
+
+## 9. 附录
+
+### 9.1 相关文档
+- 待补充
+
+### 9.2 术语表
+- 待补充
+
+---
+
+_文档由 Requirement Doc Manager Skill 自动生成_
