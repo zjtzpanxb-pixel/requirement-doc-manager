@@ -15,14 +15,13 @@ cd ~/.openclaw/workspace/skills/
 ### 配置
 
 ```bash
-# 设置飞书 API 凭证
-export FEISHU_APP_ID=cli_xxx
-export FEISHU_APP_SECRET=xxx
+# 设置阿里云百炼 API Key（必需）
+export DASHSCOPE_API_KEY="your-api-key"
 ```
 
 ### 使用
 
-**方式 1: 飞书消息**
+**方式 1: 对话触发**
 ```
 整理需求文档
 需要一个用户登录功能，支持手机号和邮箱注册
@@ -60,7 +59,8 @@ result = await orchestrator.run({
     ],
     "business_rules": ["密码必须加密存储"],
     "acceptance_criteria": ["输入正确密码可登录"],
-    "risks": [{"description": "密码泄露风险", "level": "high"}]
+    "risks": [{"description": "密码泄露风险", "level": "high"}],
+    "storage": {"type": "markdown", "path": "/需求文档库/prd_v20260314-0930.md"}
   },
   "quality_report": {
     "completeness_score": 85,
@@ -84,9 +84,10 @@ result = await orchestrator.run({
 - ✅ 完整性校验（必填项 + 格式规范）
 - ✅ 质量评分（完整率/清晰度/一致性）
 - ✅ 双模板支持（标准版/精简版）
-- ✅ 5 级降级策略
+- ✅ 降级策略（超时重试/模型降级）
 - ✅ 成本预算控制
 - ✅ 安全过滤（Prompt Injection 防护）
+- ✅ 本地 Markdown 存储
 
 ## 测试
 
@@ -120,14 +121,14 @@ python3 -m pytest --cov=src --cov-report=html
 
 ## 故障排除
 
-### 飞书 API 失败
-检查 `FEISHU_APP_ID` 和 `FEISHU_APP_SECRET` 是否正确配置
-
 ### LLM 超时
 检查网络连接，或切换到 `qwen2` 模型
 
 ### 成本超支
 调整 `config.yaml` 中的预算限制
+
+### 存储失败
+检查 `~/.openclaw/workspace/需求文档库/` 目录权限
 
 ## 文件结构
 
@@ -147,6 +148,7 @@ requirement-doc-manager/
 
 ## 版本
 
+- v1.1 (2026-03-15) - 移除飞书集成，纯本地存储
 - v1.0 (2026-03-14) - 初始版本
 
 ## 许可证
