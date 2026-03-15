@@ -5,8 +5,8 @@ environment: dev  # dev | prod
 
 # LLM 配置
 llm:
-  primary: qwen3.5-plus
-  fallback: qwen2
+  primary: default
+  fallback: fallback
   timeout: 60
   max_retries: 3
   base_delay: 1.0  # 指数退避基数（秒）
@@ -17,8 +17,8 @@ llm:
   
   # 成本估算（每 1000 tokens）
   cost_per_1k_tokens:
-    qwen3.5-plus: 0.002
-    qwen2: 0.0005
+    default: 0.002
+    fallback: 0.0005
 
 # 成本配置
 cost:

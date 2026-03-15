@@ -82,8 +82,8 @@ async def generate_prd(message: str) -> str:
     # 创建编排器
     orchestrator = ReqDocOrchestrator({
         'llm': {
-            'primary': 'qwen-plus',
-            'fallback': 'qwen-turbo',
+            'primary': 'default',
+            'fallback': 'fallback',
             'timeout': 60,
         },
         'cost': {

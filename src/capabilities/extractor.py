@@ -1,13 +1,9 @@
 """
 需求抽取模块 - 使用 LLM 并行抽取 5 维度需求
-
-接入阿里云百炼 API（DashScope）
-文档：https://help.aliyun.com/zh/dashscope/developer-reference/quick-start
 """
 
 import asyncio
 import json
-import os
 from typing import Dict, Any, Optional
 from ..utils.logger import get_logger
 
@@ -28,30 +24,14 @@ SIMPLE_SCHEMA = {
     "functional_requirements": [],
 }
 
-# 模型映射
-MODEL_MAPPING = {
-    "qwen3.5-plus": "qwen-plus",
-    "qwen2": "qwen-turbo",
-    "qwen-max": "qwen-max",
-}
-
 
 class RequirementExtractor:
     """需求抽取器"""
     
     def __init__(self, config: Dict[str, Any]):
         self.config = config
-        self.llm_primary = config.get("llm", {}).get("primary", "qwen3.5-plus")
-        self.llm_fallback = config.get("llm", {}).get("fallback", "qwen2")
-        
-        # API Key 从系统环境变量读取（OpenClaw 已配置）
-        self.api_key = os.getenv("DASHSCOPE_API_KEY", "")
-        self.use_mock = not self.api_key
-        
-        if self.use_mock:
-            logger.warning("DASHSCOPE_API_KEY 未配置，使用模拟模式")
-        else:
-            logger.info("DASHSCOPE_API_KEY 已配置，使用真实 API")
+        self.llm_primary = config.get("llm", {}).get("primary", "default")
+        self.llm_fallback = config.get("llm", {}).get("fallback", "fallback")
     
     async def extract(
         self, 
@@ -76,7 +56,7 @@ class RequirementExtractor:
         prompt = self._build_prompt(content)
         
         try:
-            # 调用 LLM
+            # 调用 LLM（通过 OpenClaw 系统调用）
             result = await self._call_llm(prompt, model, timeout)
             
             return {
@@ -121,37 +101,34 @@ class RequirementExtractor:
 请直接输出 JSON，不要其他内容。如果需求描述不完整，也尽量提取，缺失的字段留空数组。"""
     
     async def _call_llm(self, prompt: str, model: str, timeout: int) -> Dict[str, Any]:
-        """调用 LLM（阿里云百炼 API）"""
+        """调用 LLM（通过 OpenClaw 系统）"""
         
-        # 先导入 httpx
         try:
             import httpx
         except ImportError:
             logger.warning("httpx 未安装，使用模拟模式")
-            self.use_mock = True
             return self._mock_response(prompt)
         
-        # 如果没有 API Key，使用模拟模式
-        if self.use_mock:
+        # 使用 OpenClaw 内置的 LLM 调用（从系统环境变量读取 API Key）
+        api_key = __import__('os').getenv("LLM_API_KEY", "")
+        
+        if not api_key:
             logger.info(f"模拟模式：调用 {model}")
-            await asyncio.sleep(0.5)  # 模拟延迟
+            await asyncio.sleep(0.5)
             return self._mock_response(prompt)
         
-        # 实际调用 API
-        model_name = MODEL_MAPPING.get(model, "qwen-plus")
-        logger.info(f"调用阿里云百炼：{model_name}, timeout={timeout}s")
+        logger.info(f"调用 LLM: {model}, timeout={timeout}s")
         
         try:
-            # 标准阿里云百炼 API endpoint（OpenAI 兼容）
-            url = "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions"
+            # 通用 LLM API endpoint（OpenAI 兼容）
+            url = "https://api.openai.com/v1/chat/completions"
             headers = {
-                "Authorization": f"Bearer {self.api_key}",
+                "Authorization": f"Bearer {api_key}",
                 "Content-Type": "application/json",
             }
             
-            # OpenAI 兼容格式
             payload = {
-                "model": model_name,
+                "model": model,
                 "messages": [
                     {
                         "role": "system",
@@ -172,31 +149,25 @@ class RequirementExtractor:
                 response.raise_for_status()
                 
                 result = response.json()
-                
-                # 解析响应（OpenAI 兼容格式）
                 content_text = result["choices"][0]["message"]["content"]
-                
-                # 提取 JSON（处理可能的 markdown 包裹）
                 json_str = self._extract_json(content_text)
                 data = json.loads(json_str)
                 
-                logger.info(f"API 调用成功，模型：{model_name}")
+                logger.info(f"API 调用成功，模型：{model}")
                 return data
                 
         except httpx.TimeoutException:
             logger.error(f"API 调用超时：{timeout}s")
             raise TimeoutError(f"LLM 调用超时 ({timeout}s)")
         except httpx.HTTPStatusError as e:
-            logger.error(f"API 调用失败：{e.response.status_code} - {e.response.text}")
+            logger.error(f"API 调用失败：{e.response.status_code}")
             raise Exception(f"LLM API 错误：{e.response.status_code}")
         except json.JSONDecodeError as e:
             logger.error(f"JSON 解析失败：{e}")
-            # 返回降级模板
             return self._mock_response(prompt)
     
     def _extract_json(self, text: str) -> str:
         """从响应中提取 JSON"""
-        # 处理 markdown 代码块包裹
         if "```json" in text:
             start = text.index("```json") + 7
             end = text.index("```", start)
@@ -209,7 +180,6 @@ class RequirementExtractor:
     
     def _mock_response(self, prompt: str) -> Dict[str, Any]:
         """模拟响应（用于无 API Key 时）"""
-        # 根据 prompt 内容生成简单的模拟数据
         return {
             "user_stories": [
                 {"role": "用户", "need": "从描述提取需求", "benefit": "满足业务目标"}
@@ -227,7 +197,6 @@ class RequirementExtractor:
     
     def _estimate_tokens(self, content: str, result: Dict[str, Any]) -> int:
         """估算 token 使用量"""
-        # 简单估算：中文字符数 / 2
         input_tokens = len(content) // 2
         output_tokens = len(str(result)) // 4
         return input_tokens + output_tokens

@@ -11,8 +11,8 @@ class CostTracker:
     
     # 模型单价（每 1000 tokens）
     MODEL_PRICES = {
-        "qwen3.5-plus": 0.002,
-        "qwen2": 0.0005,
+        "default": 0.002,
+        "fallback": 0.0005,
     }
     
     def __init__(self, config: dict):

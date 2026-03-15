@@ -61,8 +61,8 @@
 ```yaml
 # LLM 配置
 llm:
-  primary: qwen3.5-plus
-  fallback: qwen2
+  primary: default
+  fallback: fallback
   timeout: 60
   max_retries: 3
 
@@ -93,7 +93,7 @@ template:
 ## 降级策略
 | 故障 | 应对 |
 |------|------|
-| LLM 超时 | 重试 3 次（指数退避）→ 降级 qwen2 |
+| LLM 超时 | 重试 3 次（指数退避）→ 降级 fallback 模型 |
 | 抽取为空 | 追问用户补充 → 标记"待确认" |
 | 成本超支 | 建议精简版 → 用户拒绝则中止 |
 | 连续失败 | >3 次触发告警 → 建议人工处理 |

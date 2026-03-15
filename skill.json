@@ -45,10 +45,5 @@
     "生成 PRD --project 用户管理系统",
     "写一个需求文档，优先级 P0"
   ],
-  "env": {
-    "DASHSCOPE_API_KEY": {
-      "required": true,
-      "description": "阿里云百炼 API Key"
-    }
-  }
+  "env": {}
 }

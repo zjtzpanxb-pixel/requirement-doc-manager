@@ -15,8 +15,8 @@ cd ~/.openclaw/workspace/skills/
 ### 配置
 
 ```bash
-# 设置阿里云百炼 API Key（必需）
-export DASHSCOPE_API_KEY="your-api-key"
+# 设置 LLM API Key（从系统环境变量读取）
+# OpenClaw 已配置，无需手动设置
 ```
 
 ### 使用
@@ -71,7 +71,7 @@ result = await orchestrator.run({
   },
   "execution": {
     "duration_ms": 2500,
-    "model_used": "qwen3.5-plus",
+    "model_used": "default",
     "cost": 2.0
   }
 }
@@ -122,7 +122,7 @@ python3 -m pytest --cov=src --cov-report=html
 ## 故障排除
 
 ### LLM 超时
-检查网络连接，或切换到 `qwen2` 模型
+检查网络连接，或切换到 fallback 模型
 
 ### 成本超支
 调整 `config.yaml` 中的预算限制
@@ -148,6 +148,7 @@ requirement-doc-manager/
 
 ## 版本
 
+- v1.2 (2026-03-15) - 移除厂商锁定，使用通用模型名称
 - v1.1 (2026-03-15) - 移除飞书集成，纯本地存储
 - v1.0 (2026-03-14) - 初始版本
 

@@ -150,7 +150,7 @@ class ReqDocOrchestrator:
                     timeout=self.config.get("llm", {}).get("timeout", 60)
                 )
                 
-                context.model_used = result.get("model", "qwen3.5-plus")
+                context.model_used = result.get("model", "default")
                 context.token_used = result.get("token_used", 0)
                 
                 logger.info(f"抽取成功，模型：{context.model_used}")
@@ -160,14 +160,14 @@ class ReqDocOrchestrator:
                 logger.warning(f"抽取超时，尝试 {attempt + 1}/{max_retries}")
                 if attempt == max_retries - 1:
                     # 降级到小模型
-                    logger.info("降级到 qwen2")
+                    logger.info("降级到 fallback 模型")
                     context.fallback_used = True
                     result = await self.extractor.extract(
                         content,
-                        model="qwen2",
+                        model=self.extractor.llm_fallback,
                         timeout=60
                     )
-                    context.model_used = "qwen2"
+                    context.model_used = self.extractor.llm_fallback
                     context.token_used = result.get("token_used", 0)
                     return result["data"]
                 
